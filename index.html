@@ -1,16 +1,25 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Oferta SENAI</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <title>Sistema de Oferta SENAI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Fix ambiente -->
+  <script>
+    window.process = { env: { NODE_ENV: 'production' } };
+  </script>
 
   <!-- React -->
   <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
 
-  <!-- jsPDF -->
+  <!-- Babel -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Bibliotecas -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <style>
     body {
@@ -31,13 +40,20 @@
       margin-bottom: 12px;
     }
 
+    input, select {
+      padding: 8px;
+      margin: 5px 0;
+      width: 100%;
+    }
+
     button {
-      padding: 10px 14px;
-      border: none;
-      border-radius: 6px;
+      padding: 10px;
       background: #0066cc;
       color: white;
+      border: none;
+      border-radius: 6px;
       cursor: pointer;
+      margin-top: 10px;
     }
   </style>
 </head>
@@ -45,32 +61,48 @@
 <body>
   <div id="root"></div>
 
-  <script>
-    const e = React.createElement;
+  <script type="text/babel" data-presets="react">
+
+    const { useState } = React;
 
     function App() {
+
+      const [nome, setNome] = useState("");
+      const [curso, setCurso] = useState("");
 
       function gerarPDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
 
         doc.text("Relatório SENAI", 10, 10);
+        doc.text("Nome: " + nome, 10, 20);
+        doc.text("Curso: " + curso, 10, 30);
+
         doc.save("relatorio.pdf");
       }
 
-      return e("div", { className: "container" },
+      return (
+        <div className="container">
 
-        e("div", { className: "card" },
-          e("h2", null, "Sistema de Oferta SENAI"),
-          e("p", null, "Aplicação funcionando no GitHub Pages ✔"),
-          e("button", { onClick: gerarPDF }, "Gerar PDF")
-        )
+          <div className="card">
+            <h2>Sistema de Oferta SENAI</h2>
 
+            <label>Nome</label>
+            <input value={nome} onChange={e => setNome(e.target.value)} />
+
+            <label>Curso</label>
+            <input value={curso} onChange={e => setCurso(e.target.value)} />
+
+            <button onClick={gerarPDF}>Gerar PDF</button>
+          </div>
+
+        </div>
       );
     }
 
-    const root = ReactDOM.createRoot(document.getElementById("root"));
-    root.render(e(App));
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+
   </script>
 </body>
 </html>
