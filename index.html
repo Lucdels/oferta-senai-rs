@@ -915,72 +915,6 @@
 
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
-        
-        // Função para recalcular dias e status dinamicamente baseado na data ATUAL do navegador
-        const recalcularTurmas = (turmas) => {
-            const hoje = new Date();
-            hoje.setHours(0, 0, 0, 0);
-
-            return turmas.map(turma => {
-                if (!turma.dataInicio) {
-                    return turma;
-                }
-
-                // Parse da data de início
-                const [ano, mes, dia] = turma.dataInicio.split('-').map(Number);
-                const dataInicio = new Date(ano, mes - 1, dia);
-                dataInicio.setHours(0, 0, 0, 0);
-
-                // Calcular dias para início baseado em HOJE
-                const diasParaInicio = Math.floor((dataInicio - hoje) / (1000 * 60 * 60 * 24));
-
-                // Determinar status baseado na data ATUAL
-                let status, acao, prioridade, urgenciaNivel, argumento, metaSemanal;
-                const vagas = parseInt(turma.vagas) || 0;
-
-                if (dataInicio < hoje) {
-                    status = "Início passou";
-                    acao = "🔍 Verificar com UO";
-                    prioridade = "verificar";
-                    urgenciaNivel = 0;
-                    argumento = "Turma que passou data de início: Avaliar reoferta ou vagas remanescentes.";
-                    metaSemanal = 0;
-                } else {
-                    status = "Planejada";
-                    
-                    if (diasParaInicio <= 15) {
-                        acao = "🚀 Atacar Agora";
-                        prioridade = "alta";
-                        urgenciaNivel = 3;
-                        argumento = "Turma próxima do início. Prioridade máxima de fechamento.";
-                        metaSemanal = Math.max(1, Math.floor(vagas / 2));
-                    } else if (diasParaInicio <= 45) {
-                        acao = "⚡ Avançar Rápido";
-                        prioridade = "media";
-                        urgenciaNivel = 2;
-                        argumento = "Turma em médio prazo. Intensificar prospecção.";
-                        metaSemanal = Math.max(1, Math.floor(vagas / 6));
-                    } else {
-                        acao = "📅 Planejar Avanço";
-                        prioridade = "baixa";
-                        urgenciaNivel = 1;
-                        argumento = "Turma futura. Preparar estratégia e pipeline.";
-                        metaSemanal = Math.max(1, Math.floor(vagas / 12));
-                    }
-                }
-
-                return {
-                    ...turma,
-                    diasParaInicio,
-                    status,
-                    acaoRecomendada: acao,
-                    prioridade,
-                    urgenciaNivel,
-                    argumento,
-                    metaSemanal
-                };
-            });
-        };
         const { jsPDF } = window.jspdf;
 
         // Dados incorporados
@@ -998,7 +932,6 @@
             const [sortField, setSortField] = useState('');
             const [sortDirection, setSortDirection] = useState('asc');
             const [lastUpdate, setLastUpdate] = useState(new Date());
-            const [turmasRecalculadas, setTurmasRecalculadas] = useState(() => recalcularTurmas(TURMAS_DATA_RAW));
             const [selectedTurmas, setSelectedTurmas] = useState(new Set());
             const [showPdfModal, setShowPdfModal] = useState(false);
             const [pdfConfig, setPdfConfig] = useState({
@@ -1010,22 +943,13 @@
             });
             const itemsPerPage = 20;
 
-            // Auto-refresh a cada 1 minuto e recalcular turmas
+            // Auto-refresh a cada 1 minuto
             useEffect(() => {
                 const interval = setInterval(() => {
-                    const agora = new Date();
-                    setLastUpdate(agora);
-                    
-                    // Recalcular turmas automaticamente com a data atual
-                    const turmasAtualizadas = recalcularTurmas(TURMAS_DATA_RAW);
-                    setTurmasRecalculadas(turmasAtualizadas);
-                }, 60000); // Recalcula a cada 1 minuto
-                
+                    setLastUpdate(new Date());
+                }, 60000);
                 return () => clearInterval(interval);
             }, []);
-
-            // Usar turmas recalculadas em vez dos dados estáticos
-            const TURMAS_DATA = turmasRecalculadas;
 
             // Aplicar filtros rápidos
             const applyQuickFilter = (filter) => {
