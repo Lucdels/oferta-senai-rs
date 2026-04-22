@@ -912,10 +912,8 @@
 </head>
 <body>
     <div id="root"></div>
-<script>
-  window.process = { env: { NODE_ENV: 'production' } };
-</script>
-    <script type="text/babel" data-presets="react">
+
+    <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
         
         // Função para recalcular dias e status dinamicamente baseado na data ATUAL do navegador
@@ -1000,7 +998,7 @@
             const [sortField, setSortField] = useState('');
             const [sortDirection, setSortDirection] = useState('asc');
             const [lastUpdate, setLastUpdate] = useState(new Date());
-            const [turmasRecalculadas, setTurmasRecalculadas] = useState(() => recalcularTurmas(TURMAS_DATA));
+            const [turmasRecalculadas, setTurmasRecalculadas] = useState(() => recalcularTurmas(TURMAS_DATA_RAW));
             const [selectedTurmas, setSelectedTurmas] = useState(new Set());
             const [showPdfModal, setShowPdfModal] = useState(false);
             const [pdfConfig, setPdfConfig] = useState({
@@ -1019,7 +1017,7 @@
                     setLastUpdate(agora);
                     
                     // Recalcular turmas automaticamente com a data atual
-                    const turmasAtualizadas = recalcularTurmas(TURMAS_DATA);
+                    const turmasAtualizadas = recalcularTurmas(TURMAS_DATA_RAW);
                     setTurmasRecalculadas(turmasAtualizadas);
                 }, 60000); // Recalcula a cada 1 minuto
                 
@@ -1944,8 +1942,7 @@
             );
         }
 
-       const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(<App />);
+        ReactDOM.render(<App />, document.getElementById('root'));
     </script>
 </body>
 </html>
